@@ -1,59 +1,38 @@
-# monsters_token_manager.gd
+# monster_token_manager.gd
 extends Node
 
 # Reference to the Solana bridge
 onready var solana_bridge = $"../SolanaBridge"  # Adjust path as needed
 
-# Reference to your existing monsters system
-export(NodePath) var monsters_manager_path
-var monsters_manager
+# Token reward values for each monster type
+const token_rewards = {
+    Monsters.SLIME: 1,
+    Monsters.RED_SLIME: 2,
+    Monsters.MUSHROOM: 3
+}
 
 func _ready():
-    # Get reference to monsters manager
-    if monsters_manager_path:
-        monsters_manager = get_node(monsters_manager_path)
-        
-        # Connect to relevant signals if your monsters have them
-        # Example: If monsters emit a "harvested" or "fed" signal
-        # Connect to monsters signals based on your implementation
-        _connect_monster_signals()
+    # Connect to the game's monster defeat signal
+    # This depends on where/how your game signals monster defeats
+    # You might need to adjust this based on your game's structure
+    var game_manager = get_tree().get_nodes_in_group("game_manager")
+    if game_manager.size() > 0:
+        if game_manager[0].has_signal("monster_defeated"):
+            game_manager[0].connect("monster_defeated", self, "_on_monster_defeated")
 
-# Connect to all monster signals
-func _connect_monster_signals():
-    # This depends on how your monsters system is implemented
-    # You might need to iterate through monsters or connect to a manager
+# Called when a monster is defeated
+func _on_monster_defeated(monster_type):
+    # Calculate reward based on monster type
+    var reward = get_token_reward(monster_type)
     
-    # Example if you have a signal for harvesting/collecting from monsters:
-    # monsters_manager.connect("monster_harvested", self, "_on_monster_harvested")
+    # Award tokens via Solana
+    solana_bridge.reward_tokens(reward)
     
-    # Or if each monster emits its own signal:
-    for monster in monsters_manager.get_children():
-        if monster.has_signal("harvested"):
-            monster.connect("harvested", self, "_on_monster_harvested")
+    # Optional: Show feedback to player
+    print("Earned " + str(reward) + " tokens for defeating monster!")
 
-# Handle monster harvests/interactions that should reward tokens
-func _on_monster_harvested(product_or_monster_type, amount):
-    # Calculate token reward based on your game design
-    var token_reward = calculate_token_reward(product_or_monster_type, amount)
-    
-    # Reward tokens via Solana
-    solana_bridge.reward_tokens(token_reward)
-    
-    print("Rewarded " + str(token_reward) + " tokens for monster interaction")
-
-# Calculate token rewards based on monster type/product and amount
-func calculate_token_reward(product_or_monster_type, amount):
-    # Customize this based on your game economy
-    var base_reward = 1
-    
-    # Different rewards for different monster types or products
-    match product_or_monster_type:
-        "rare_monster":
-            base_reward = 5
-        "common_monster":
-            base_reward = 2
-        # Add more types based on your game
-        _:
-            base_reward = 1
-    
-    return base_reward * amount
+# Get token reward amount based on monster type
+func get_token_reward(monster_type):
+    if token_rewards.has(monster_type):
+        return token_rewards[monster_type]
+    return 1  # Default reward
