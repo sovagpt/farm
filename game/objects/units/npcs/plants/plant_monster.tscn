@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://game/objects/units/npcs/base_ai.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/units/npcs/plants/plant_monster.gd" type="Script" id=2]
+
+[node name="PlantMonster" groups=[
+"PlantNPC",
+] instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+SPEED = 0.4
+
+[node name="Sprite" parent="." index="0"]
+vframes = 3
+hframes = 2
+

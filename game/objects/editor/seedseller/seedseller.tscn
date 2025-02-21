@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://game/objects/base_object.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/editor/seedseller/seedseller.gd" type="Script" id=2]
+[ext_resource path="res://game/objects/editor/seedseller/seed_seller.png" type="Texture" id=3]
+
+[node name="SeedSeller" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+blocks_movement = true
+
+[node name="Sprite" type="Sprite" parent="." index="0"]
+texture = ExtResource( 3 )
+offset = Vector2( -4, -8 )
+_sections_unfolded = [ "Offset" ]
+

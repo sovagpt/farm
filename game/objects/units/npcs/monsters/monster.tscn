@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://game/objects/units/npcs/base_ai.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/units/npcs/monsters/monster.gd" type="Script" id=2]
+
+[node name="Monster" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+_sections_unfolded = [ "Script" ]
+SPEED = 0.4
+NO_FACING = true
+
+[node name="Sprite" parent="." index="0"]
+hframes = 2
+

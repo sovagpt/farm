@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://game/objects/base_object.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/plants/plant.gd" type="Script" id=2]
+[ext_resource path="res://game/objects/plants/cabbage.png" type="Texture" id=3]
+[ext_resource path="res://sounds/hurt.wav" type="AudioStream" id=4]
+
+[sub_resource type="AudioStreamRandomPitch" id=1]
+
+audio_stream = ExtResource( 4 )
+random_pitch = 1.1
+
+[node name="Plant" index="0" groups=[
+"Plant",
+] instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+_sections_unfolded = [ "Script", "Z Index" ]
+
+[node name="Sprite" type="Sprite" parent="." index="0"]
+texture = ExtResource( 3 )
+offset = Vector2( 0, -2 )
+hframes = 3
+frame = 2
+_sections_unfolded = [ "Animation", "Offset", "Transform" ]
+
+[node name="SFXHurt" type="AudioStreamPlayer2D" parent="." index="1"]
+stream = SubResource( 1 )
+volume_db = 0.0
+pitch_scale = 1.0
+autoplay = false
+stream_paused = false
+max_distance = 256.0
+attenuation = 1.0
+bus = "SoundEffects"
+area_mask = 1
+_sections_unfolded = [ "stream" ]
+

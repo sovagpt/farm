@@ -1,0 +1,49 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://game/objects/units/base_unit.gd" type="Script" id=1]
+[ext_resource path="res://sounds/footstep.wav" type="AudioStream" id=2]
+
+[sub_resource type="AudioStreamRandomPitch" id=1]
+
+audio_stream = ExtResource( 2 )
+random_pitch = 1.1
+
+[node name="BaseUnit" type="Node2D" groups=[
+"Unit",
+]]
+script = ExtResource( 1 )
+blocks_movement = true
+SPEED = 0.25
+NO_FACING = false
+
+[node name="Sprite" type="Sprite" parent="."]
+offset = Vector2( 0, -2 )
+_sections_unfolded = [ "Offset" ]
+
+[node name="Tween" type="Tween" parent="."]
+repeat = false
+playback_process_mode = 0
+playback_speed = 1.0
+playback/active = false
+playback/repeat = false
+playback/speed = 1.0
+
+[node name="DelayTimer" type="Timer" parent="."]
+process_mode = 0
+wait_time = 1.0
+one_shot = true
+autostart = false
+
+[node name="SFXFootstep" type="AudioStreamPlayer2D" parent="."]
+stream = SubResource( 1 )
+volume_db = 0.0
+pitch_scale = 0.6666
+autoplay = false
+stream_paused = false
+max_distance = 64.0
+attenuation = 1.0
+bus = "SoundEffects"
+area_mask = 1
+_sections_unfolded = [ "stream" ]
+
+[connection signal="timeout" from="DelayTimer" to="." method="_on_DelayTimer_timeout"]

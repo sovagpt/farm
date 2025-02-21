@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://game/objects/base_object.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/editor/level_swapper.gd" type="Script" id=2]
+
+[node name="LevelSwapper" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+LEVEL_NAME = ""
+SPAWN_ID = 0
+TRIGGER_TYPE = 1
+
+[node name="Position2D" type="Position2D" parent="." index="0"]
+

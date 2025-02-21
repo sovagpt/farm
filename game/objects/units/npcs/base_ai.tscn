@@ -1,0 +1,99 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://game/objects/units/base_unit.tscn" type="PackedScene" id=1]
+[ext_resource path="res://game/objects/units/npcs/base_ai.gd" type="Script" id=2]
+[ext_resource path="res://sounds/hurt.wav" type="AudioStream" id=3]
+
+[sub_resource type="Shader" id=1]
+
+code = "shader_type canvas_item;
+
+uniform vec4 damaged_color_light : hint_color = vec4(1.0, 1.0, 1.0, 1.0);
+uniform vec4 damaged_color_dark : hint_color = vec4(0.0, 0.0, 0.0, 1.0);
+uniform bool damage_on = false;
+
+void fragment() {
+	COLOR = texture(TEXTURE, UV);
+	
+	vec3 damage_color = (COLOR.rgb * 1.25 - 0.5) * 100.0 + 0.5;
+	float gray = clamp(dot(damage_color, vec3(0.3, 0.59, 0.11)), 0.0, 1.0);
+	damage_color = mix(damaged_color_dark, damaged_color_light, gray).rgb;
+	
+	COLOR.rgb = mix(COLOR.rgb, damage_color, float(damage_on));
+}"
+_sections_unfolded = [ "Resource" ]
+
+[sub_resource type="ShaderMaterial" id=2]
+
+render_priority = 0
+shader = SubResource( 1 )
+shader_param/damaged_color_light = Color( 0.94902, 0.94902, 0.941176, 1 )
+shader_param/damaged_color_dark = Color( 0.388235, 0.211765, 0.384314, 1 )
+shader_param/damage_on = false
+_sections_unfolded = [ "Shader Param", "shader" ]
+
+[sub_resource type="Animation" id=3]
+
+resource_name = "damaged"
+length = 0.3
+loop = false
+step = 0.1
+tracks/0/type = "value"
+tracks/0/path = NodePath("Sprite:material:shader_param/damage_on")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 1,
+"values": [ true, false, true, false ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Sprite:offset")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.1, 0.2, 0.3 ),
+"transitions": PoolRealArray( 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 0, -2 ), Vector2( 2, -2 ), Vector2( -2, -2 ), Vector2( 0, -2 ) ]
+}
+
+[sub_resource type="AudioStreamRandomPitch" id=4]
+
+audio_stream = ExtResource( 3 )
+random_pitch = 1.1
+
+[node name="BaseAI" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+blocks_movement = false
+
+[node name="Sprite" parent="." index="0"]
+material = SubResource( 2 )
+_sections_unfolded = [ "Animation", "Material", "Offset", "material" ]
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="2"]
+root_node = NodePath("..")
+autoplay = ""
+playback_process_mode = 1
+playback_default_blend_time = 0.0
+playback_speed = 1.0
+anims/damaged = SubResource( 3 )
+blend_times = [  ]
+
+[node name="SFXHurt" type="AudioStreamPlayer2D" parent="." index="4"]
+stream = SubResource( 4 )
+volume_db = 0.0
+pitch_scale = 1.0
+autoplay = false
+stream_paused = false
+max_distance = 256.0
+attenuation = 1.0
+bus = "SoundEffects"
+area_mask = 1
+_sections_unfolded = [ "stream" ]
+
