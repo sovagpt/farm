@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoFarm - Pixel Farm Game</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #87CEEB;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            color: white;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            background-color: #7CFC00;
+            border: 4px solid #8B4513;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        
+        #game-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 80px);
+            grid-template-rows: repeat(6, 100px);
+            position: relative;
+        }
+        
+        .tile {
+            width: 80px;
+            height: 100px;
+            box-sizing: border-box;
+            border: 1px dashed rgba(139, 69, 19, 0.3);
+            transition: background-color 0.3s;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            font-size: 12px;
+            position: relative;
+        }
+        
+        .tile:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .plant {
+            width: 64px;
+            height: 64px;
+            position: absolute;
+            bottom: 10px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center bottom;
+            image-rendering: pixelated;
+        }
+        
+        .plant.wheat {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAhklEQVR42mNgGAWjYBQMVBBX1/C/rqH5/2gwMsYAjaxrbP4/aA2oa2z5P2gNqGtq+z9oDahraqMcA1pBEbLSDsjK2//XwcygGAM0gCZGKQYiM6AUpQ5taP8/aA2oa+r4P2gNqGvu/D9oDYAFw6A1oBYaDIPWgLoWCgygUy4YBaNgFNAXAADOXWcKMRQp1AAAAABJRU5ErkJggg==');
+        }
+        
+        .plant.carrot {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAnElEQVR42mNgGAWjYBQMJhDX0PC/rqH5/2gwKsYAjaxrbP4/aA2oa2z5P2gNqGtq+z9oDahravs/aA2oa2r7P2gNqGtq/T9oDQCG9f9Ba0BdU8f/QWsAPBgGrQF1TZ3/B60BdU1d/wetAXXN3f8HrQF1zT3/B60Bdc29/wetAXUtfYPWgLqWvv+D1oC6lr7/g9aAutb+/6NgFIyCwQQAzDNxCrqNvMwAAAAASUVORK5CYII=');
+        }
+        
+        .plant.corn {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAnElEQVR42mNgGAWjYBQMJhBX1/C/rqH5/2gwMsYAjaxrbP4/aA2oa2z5P2gNqGtq+z9oDahraqMMA1pBEboySgxoAJpIKQa0oSujzICmtv+D1oC6po7/g9aAuqaO/4PWgLrmzv+D1oC65s7/g9aAuubu/4PWgLrm7v+D1oC65p7/g9aAutbe/4PWgLrW3v+D1oC61t7/g9aA+rb+/6NgFAxXAADfQ2QIFoUcMAAAAABJRU5ErkJggg==');
+        }
+        
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        
+        #shop-panel {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        
+        button {
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background-color: #A0522D;
+        }
+        
+        .growth-stage {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 3px;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .growth-fill {
+            height: 100%;
+            background-color: #32CD32;
+            width: 0%;
+        }
+
+        #notifications {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .notification {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            animation: fadeOut 3s forwards;
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        #connect-wallet {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 20;
+        }
+
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #modal-content {
+            background-color: #4B7F52;
+            padding: 20px;
+            border-radius: 5px;
+            border: 4px solid #8B4513;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #8B4513;
+            text-shadow: 2px 2px 0px #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <h1>CryptoFarm</h1>
+    
+    <div id="game-container">
+        <div id="hud">
+            <div>Tokens: <span id="token-count">100</span> CROP</div>
+            <div>Coins: <span id="coin-count">50</span></div>
+        </div>
+        
+        <div id="shop-panel">
+            <h3>Farm Shop</h3>
+            <button id="buy-wheat">Buy Wheat (5 coins)</button>
+            <button id="buy-carrot">Buy Carrot (10 coins)</button>
+            <button id="buy-corn">Buy Corn (15 coins)</button>
+            <hr>
+            <button id="harvest-all">Harvest All</button>
+        </div>
+        
+        <div id="game-grid"></div>
+    </div>
+    
+    <div id="notifications"></div>
+    
+    <button id="connect-wallet">Connect Wallet (Mock)</button>
+    
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <h2>Welcome to CryptoFarm!</h2>
+            <p>Build your farm, grow crops, and earn CROP tokens!</p>
+            <p>This is a basic prototype of a blockchain-based farming game.</p>
+            <p><small>Note: No actual cryptocurrency is involved in this demo.</small></p>
+            <button id="start-game">Start Farming</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            tokens: 100,
+            coins: 50,
+            selectedSeed: null,
+            walletConnected: false,
+            tiles: [],
+            prices: {
+                wheat: 5,
+                carrot: 10,
+                corn: 15
+            },
+            rewards: {
+                wheat: { coins: 8, tokens: 1 },
+                carrot: { coins: 16, tokens: 2 },
+                corn: { coins: 25, tokens: 3 }
+            },
+            growthTimes: {
+                wheat: 10, // seconds
+                carrot: 20,
+                corn: 30
+            }
+        };
+
+        // DOM elements
+        const gameGrid = document.getElementById('game-grid');
+        const tokenCount = document.getElementById('token-count');
+        const coinCount = document.getElementById('coin-count');
+        const buyWheatBtn = document.getElementById('buy-wheat');
+        const buyCarrotBtn = document.getElementById('buy-carrot');
+        const buyCorntBtn = document.getElementById('buy-corn');
+        const harvestAllBtn = document.getElementById('harvest-all');
+        const connectWalletBtn = document.getElementById('connect-wallet');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const startGameBtn = document.getElementById('start-game');
+        const notificationsContainer = document.getElementById('notifications');
+
+        // Initialize game grid
+        function initializeGrid() {
+            for (let i = 0; i < 60; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = i;
+                
+                // Create growth bar
+                const growthStage = document.createElement('div');
+                growthStage.className = 'growth-stage';
+                const growthFill = document.createElement('div');
+                growthFill.className = 'growth-fill';
+                growthStage.appendChild(growthFill);
+                tile.appendChild(growthStage);
+                
+                tile.addEventListener('click', () => handleTileClick(tile));
+                gameGrid.appendChild(tile);
+                
+                // Store tile reference
+                gameState.tiles.push({
+                    element: tile,
+                    growthFill: growthFill,
+                    planted: null,
+                    growthTimer: null,
+                    growthProgress: 0,
+                    isGrown: false
+                });
+            }
+        }
+
+        // Handle tile click
+        function handleTileClick(tile) {
+            const index = parseInt(tile.dataset.index);
+            const tileState = gameState.tiles[index];
+            
+            // If the tile is grown, harvest it
+            if (tileState.isGrown) {
+                harvestTile(index);
+                return;
+            }
+            
+            // If nothing is selected or planted, do nothing
+            if (!gameState.selectedSeed && !tileState.planted) {
+                return;
+            }
+            
+            // If something is already planted, do nothing
+            if (tileState.planted) {
+                return;
+            }
+            
+            // Plant the selected seed
+            plantSeed(index, gameState.selectedSeed);
+        }
+
+        // Plant a seed on a tile
+        function plantSeed(tileIndex, seedType) {
+            // Check if we have enough coins
+            if (gameState.coins < gameState.prices[seedType]) {
+                showNotification("Not enough coins!");
+                return;
+            }
+            
+            const tileState = gameState.tiles[tileIndex];
+            const tile = tileState.element;
+            
+            // Deduct coins
+            gameState.coins -= gameState.prices[seedType];
+            updateHUD();
+            
+            // Create plant element
+            const plant = document.createElement('div');
+            plant.className = `plant ${seedType}`;
+            tile.appendChild(plant);
+            
+            // Update tile state
+            tileState.planted = seedType;
+            tileState.growthProgress = 0;
+            tileState.isGrown = false;
+            
+            // Start growth timer
+            startGrowthTimer(tileIndex);
+            
+            showNotification(`Planted ${seedType}!`);
+        }
+
+        // Start growth timer for a planted seed
+        function startGrowthTimer(tileIndex) {
+            const tileState = gameState.tiles[tileIndex];
+            const seedType = tileState.planted;
+            const totalTime = gameState.growthTimes[seedType];
+            
+            // Clear any existing timer
+            if (tileState.growthTimer) {
+                clearInterval(tileState.growthTimer);
+            }
+            
+            // Create new timer
+            const startTime = Date.now();
+            tileState.growthTimer = setInterval(() => {
+                const elapsedTime = (Date.now() - startTime) / 1000;
+                const progress = Math.min(elapsedTime / totalTime, 1);
+                
+                // Update growth progress
+                tileState.growthProgress = progress;
+                tileState.growthFill.style.width = `${progress * 100}%`;
+                
+                // If fully grown
+                if (progress >= 1) {
+                    clearInterval(tileState.growthTimer);
+                    tileState.isGrown = true;
+                    tileState.element.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+                    showNotification(`${seedType} is ready to harvest!`);
+                }
+            }, 100);
+        }
+
+        // Harvest a grown plant
+        function harvestTile(tileIndex) {
+            const tileState = gameState.tiles[tileIndex];
+            
+            if (!tileState.isGrown) {
+                return;
+            }
+            
+            const seedType = tileState.planted;
+            const rewards = gameState.rewards[seedType];
+            
+            // Award coins and tokens
+            gameState.coins += rewards.coins;
+            gameState.tokens += rewards.tokens;
+            
+            // Update HUD
+            updateHUD();
+            
+            // Reset tile
+            tileState.element.style.backgroundColor = '';
+            const plantElement = tileState.element.querySelector('.plant');
+            if (plantElement) {
+                plantElement.remove();
+            }
+            
+            // Reset tile state
+            tileState.planted = null;
+            tileState.isGrown = false;
+            tileState.growthProgress = 0;
+            tileState.growthFill.style.width = '0%';
+            
+            showNotification(`Harvested ${seedType}! +${rewards.coins} coins, +${rewards.tokens} CROP`);
+        }
+
+        // Harvest all grown plants
+        function harvestAll() {
+            let harvestedCount = 0;
+            
+            gameState.tiles.forEach((tileState, index) => {
+                if (tileState.isGrown) {
+                    harvestTile(index);
+                    harvestedCount++;
+                }
+            });
+            
+            if (harvestedCount > 0) {
+                showNotification(`Harvested ${harvestedCount} plants!`);
+            } else {
+                showNotification("Nothing to harvest!");
+            }
+        }
+
+        // Update HUD displays
+        function updateHUD() {
+            tokenCount.textContent = gameState.tokens;
+            coinCount.textContent = gameState.coins;
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            notificationsContainer.appendChild(notification);
+            
+            // Remove after animation
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Connect wallet (mock function)
+        function connectWallet() {
+            if (gameState.walletConnected) {
+                return;
+            }
+            
+            gameState.walletConnected = true;
+            connectWalletBtn.textContent = "Wallet Connected";
+            showNotification("Wallet connected (mock)!");
+        }
+
+        // Event listeners
+        buyWheatBtn.addEventListener('click', () => {
+            gameState.selectedSeed = 'wheat';
+            showNotification("Selected Wheat seed");
+        });
+        
+        buyCarrotBtn.addEventListener('click', () => {
+            gameState.selectedSeed = 'carrot';
+            showNotification("Selected Carrot seed");
+        });
+        
+        buyCorntBtn.addEventListener('click', () => {
+            gameState.selectedSeed = 'corn';
+            showNotification("Selected Corn seed");
+        });
+        
+        harvestAllBtn.addEventListener('click', harvestAll);
+        
+        connectWalletBtn.addEventListener('click', connectWallet);
+        
+        startGameBtn.addEventListener('click', () => {
+            modalOverlay.style.display = 'none';
+        });
+
+        // Initialize the game
+        initializeGrid();
+        updateHUD();
+    </script>
+</body>
+</html>
