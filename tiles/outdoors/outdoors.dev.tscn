@@ -1,0 +1,66 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://tiles/outdoors/dirt.png" type="Texture" id=1]
+[ext_resource path="res://tiles/outdoors/grass.png" type="Texture" id=2]
+[ext_resource path="res://tiles/outdoors/tilled.png" type="Texture" id=3]
+[ext_resource path="res://tiles/outdoors/wall.png" type="Texture" id=4]
+[ext_resource path="res://tiles/outdoors/tilled_wet.png" type="Texture" id=5]
+[ext_resource path="res://tiles/outdoors/grass_path.png" type="Texture" id=6]
+[ext_resource path="res://tiles/outdoors/water.png" type="Texture" id=7]
+[ext_resource path="res://tiles/outdoors/wall_grass.png" type="Texture" id=8]
+[ext_resource path="res://tiles/outdoors/wall_blank.png" type="Texture" id=9]
+
+
+[node name="Node" type="Node" index="0"]
+
+[node name="Dirt" type="Sprite" parent="." index="0"]
+position = Vector2( 40, 16 )
+texture = ExtResource( 1 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="Grass" type="Sprite" parent="." index="1"]
+texture = ExtResource( 2 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="Tilled" type="Sprite" parent="." index="2"]
+position = Vector2( 0, 32 )
+texture = ExtResource( 3 )
+centered = false
+_sections_unfolded = [ "Transform" ]
+
+[node name="Wall" type="Sprite" parent="." index="3"]
+position = Vector2( 0, 64 )
+texture = ExtResource( 4 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="TilledWet" type="Sprite" parent="." index="4"]
+position = Vector2( 0, 40 )
+texture = ExtResource( 5 )
+centered = false
+_sections_unfolded = [ "Transform" ]
+
+[node name="GrassPath" type="Sprite" parent="." index="5"]
+position = Vector2( 32, 32 )
+texture = ExtResource( 6 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="Water" type="Sprite" parent="." index="6"]
+position = Vector2( 64, 32 )
+texture = ExtResource( 7 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="WallGrass" type="Sprite" parent="." index="7"]
+position = Vector2( 32, 64 )
+texture = ExtResource( 8 )
+centered = false
+_sections_unfolded = [ "Offset" ]
+
+[node name="WallBlank" type="Sprite" parent="." index="8"]
+position = Vector2( 4, 60 )
+texture = ExtResource( 9 )
+

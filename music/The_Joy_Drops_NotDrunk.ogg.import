@@ -1,0 +1,15 @@
+[remap]
+
+importer="ogg_vorbis"
+type="AudioStreamOGGVorbis"
+path="res://.import/The_Joy_Drops_NotDrunk.ogg-667ef77d8958becc59f41c2fad0932b9.oggstr"
+
+[deps]
+
+source_file="res://music/The_Joy_Drops_NotDrunk.ogg"
+dest_files=[ "res://.import/The_Joy_Drops_NotDrunk.ogg-667ef77d8958becc59f41c2fad0932b9.oggstr" ]
+
+[params]
+
+loop=true
+loop_offset=0

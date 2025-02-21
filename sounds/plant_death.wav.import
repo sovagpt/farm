@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/plant_death.wav-9b212696c91423365effb19803d7982e.sample"
+
+[deps]
+
+source_file="res://sounds/plant_death.wav"
+dest_files=[ "res://.import/plant_death.wav-9b212696c91423365effb19803d7982e.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=true
+edit/normalize=false
+edit/loop=false
+compress/mode=0
