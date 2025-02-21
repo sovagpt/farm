@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>Crypto Farm Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+        }
+        #canvas {
+            display: block;
+            margin: 0;
+            color: white;
+        }
+        #canvas:focus {
+            outline: none;
+        }
+        .godot {
+            color: #e0e0e0;
+            background-color: #3b3943;
+            background-image: linear-gradient(to bottom, #403e48, #35333c);
+            border: 1px solid #45434e;
+            box-shadow: 0 0 1px 1px #2f2d35;
+        }
+        .godot_container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #status {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+        #status-progress {
+            width: 80%;
+            height: 16px;
+            background-color: #333;
+            border: 1px solid #666;
+            padding: 1px;
+            border-radius: 8px;
+            box-shadow: 0 0 4px #111;
+        }
+        #status-progress-inner {
+            height: 100%;
+            width: 0;
+            background-color: #4A8;
+            border-radius: 6px;
+            box-shadow: 0 0 4px #111;
+            transition: width 0.2s ease-in;
+        }
+        #status-notice {
+            margin-top: 10px;
+            color: #BBB;
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+    </style>
+    
+    <!-- Add Solana libraries -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    
+    <!-- Add your custom solana integration -->
+    <script src="solana_integration.js"></script>
+</head>
+<body>
+    <div class="godot_container">
+        <canvas id="canvas"></canvas>
+    </div>
+    <div id="status">
+        <div id="status-progress">
+            <div id="status-progress-inner"></div>
+        </div>
+        <div id="status-notice">Loading...</div>
+    </div>
+
+    <script>
+        var engine = new Engine;
+        var setStatusMode;
+        var setStatusNotice;
+        
+        function Engine() {
+            const EXECUTABLE_NAME = 'GODOT_PROJECT_NAME.js';
+            const MAIN_PACK = 'GODOT_PROJECT_NAME.pck';
+            const DEBUG_ENABLED = true;
+            const INDETERMINATE_STATUS_STEP_MS = 100;
+
+            var canvas = document.getElementById('canvas');
+            var statusProgress = document.getElementById('status-progress');
+            var statusProgressInner = document.getElementById('status-progress-inner');
+            var statusIndeterminate = document.getElementById('status-indeterminate');
+            var statusNotice = document.getElementById('status-notice');
+
+            this.setStatusMode = function(mode) {
+                // Mode 'hidden' refers to the status bar in general (progress + notice)
+                statusNotice.style.display = (mode === 'hidden' ? 'none' : 'block');
+                if (mode === 'hidden') {
+                    document.getElementById('status').style.display = 'none';
+                } else {
+                    document.getElementById('status').style.display = '';
+                }
+            };
+
+            this.setStatusNotice = function(text) {
+                statusNotice.innerHTML = text;
+            };
+
+            this.setProgressFunc = function(val) {
+                statusProgressInner.style.width = Math.floor(val * 100) + '%';
+            };
+
+            function animateStatusIndeterminate(ms) {
+                var i = 0;
+                setInterval(function() {
+                    // Animate only if status bar is indeterminate and visible
+                    if (statusIndeterminate.style.display === '') {
+                        i = (i + 1) % 8;
+                        statusIndeterminate.style.backgroundPosition = i * 100 + '% 0';
+                    }
+                }, ms);
+            }
+
+            this.startGame = function(executableName, mainPack, debugEnabled) {
+                // Load and execute script first if it exists
+                if (typeof getGodotExports !== 'undefined') {
+                    var godot = getGodotExports();
+                    godot.calledRun = false;
+                    godot.onRuntimeInitialized = function() {
+                        this.setStatusMode('indeterminate');
+                        this.setStatusNotice('Initializing...');
+                        this.startGame('index', mainPack);
+                    }.bind(this);
+                    godot.onExit = function() {
+                        godot.onExit = null;
+                        this.initializeProgress = null;
+                        this.setStatusMode('indeterminate');
+                        this.setStatusNotice('Exited.');
+                    }.bind(this);
+                    return;
+                }
+
+                var script = document.createElement('script');
+                script.src = executableName;
+                script.onload = function() {
+                    var engine = Engine.new();
+                    if (debugEnabled) {
+                        engine.init_debug(true);
+                    }
+                    engine.init('canvas');
+                    engine.main_pack_loaded = function() {
+                        this.setStatusMode('hidden');
+                        engine.main();
+                    }.bind(this);
+                    if (mainPack) {
+                        engine.load_main_pack(mainPack, function() {
+                            if (typeof engine.main_pack_loaded === 'function') {
+                                engine.main_pack_loaded();
+                            }
+                        });
+                    }
+                }.bind(this);
+                document.body.appendChild(script);
+            };
+
+            // Show 'Indeterminate' status bar
+            setStatusMode = function(mode) {
+                this.setStatusMode(mode);
+            }.bind(this);
+            setStatusNotice = function(text) {
+                this.setStatusNotice(text);
+            }.bind(this);
+
+            animateStatusIndeterminate(INDETERMINATE_STATUS_STEP_MS);
+        }
+
+        // Setup global functions for Godot engine (These are called by Godot)
+        window.godot_callback = function(callbackID, args) {
+            if (typeof window._godot_callbacks === 'undefined') {
+                return;
+            }
+            if (typeof window._godot_callbacks[callbackID] !== 'function') {
+                return;
+            }
+            window._godot_callbacks[callbackID](args);
+        };
+
+        // Start the game
+        engine.startGame('GODOT_PROJECT_NAME.js', 'GODOT_PROJECT_NAME.pck', true);
+    </script>
+</body>
+</html>
