@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://global/music_player.gd" type="Script" id=1]
+[ext_resource path="res://music/The_Joy_Drops_NotDrunk.ogg" type="AudioStream" id=2]
+
+[node name="MusicPlayer" type="Node"]
+pause_mode = 2
+script = ExtResource( 1 )
+_sections_unfolded = [ "Pause" ]
+
+[node name="MusicStream" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 2 )
+volume_db = 0.0
+pitch_scale = 1.0
+autoplay = true
+stream_paused = false
+mix_target = 0
+bus = "Music"
+
